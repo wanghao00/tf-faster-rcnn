@@ -1,4 +1,8 @@
 # tf-faster-rcnn
+现在时间是2017/10/30 17:02 <br/>
+
+在Ubuntu16.04上使用TiTan Xp GPU来学习DL, 注意当前配置cuda8.0 cudnn5.1,所以tensorflow只能安装`v1.1`(最新的tensorflow版本问`v1.2`); 因为当前选择配置问tensorflow v1.1,tf-faster-rcnn当前master分支实现是基于tensorflow v1.2版本的,好在作者发现这个问题后,重新建立了`r1.0`分支来继续对tensorflow v1.1 提供支持
+
 A Tensorflow implementation of faster RCNN detection framework by Xinlei Chen (xinleic@cs.cmu.edu). This repository is based on the python Caffe implementation of faster RCNN available [here](https://github.com/rbgirshick/py-faster-rcnn).
 
 **Note**: Several minor modifications are made when reimplementing the framework, which give potential improvements. For details about the modifications and ablative analysis, please refer to the technical report [An Implementation of Faster RCNN with Study for Region Sampling](https://arxiv.org/pdf/1702.02138.pdf). If you are seeking to reproduce the results in the original paper, please use the [official code](https://github.com/ShaoqingRen/faster_rcnn) or maybe the [semi-official code](https://github.com/rbgirshick/py-faster-rcnn). For details about the faster RCNN architecture please refer to the paper [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/pdf/1506.01497.pdf).
@@ -54,13 +58,15 @@ Additional features not mentioned in the [report](https://arxiv.org/pdf/1702.021
   - Python packages you might not have: `cython`, `opencv-python`, `easydict` (similar to [py-faster-rcnn](https://github.com/rbgirshick/py-faster-rcnn)). For `easydict` make sure you have the right version. I use 1.6.
   - Docker users: Since the recent upgrade, the docker image on docker hub (https://hub.docker.com/r/mbuckler/tf-faster-rcnn-deps/) is no longer valid. However, you can still build your own image by using dockerfile located at `docker` folder (cuda 8 version, as it is required by Tensorflow r1.0.) And make sure following Tensorflow installation to install and use nvidia-docker[https://github.com/NVIDIA/nvidia-docker]. Last, after launching the container, you have to build the Cython modules within the running container. 
 
-### Installation
-1. Clone the repository
+### 安装(共4步)
+1. 克隆仓库
   ```Shell
   git clone https://github.com/endernewton/tf-faster-rcnn.git
+  # or
+  git clone -b r1.0 https://github.com/endernewton/tf-faster-rcnn.git
   ```
 
-2. Update your -arch in setup script to match your GPU
+2. 更新setup.py 脚本中 -arch参数 来更好匹配你的GPU
   ```Shell
   cd tf-faster-rcnn/lib
   # Change the GPU architecture (-arch) if necessary
@@ -75,24 +81,26 @@ Additional features not mentioned in the [report](https://arxiv.org/pdf/1702.021
   | Grid K520 (AWS g2.2xlarge) | sm_30 |
   | Tesla K80 (AWS p2.xlarge) | sm_37 |
 
-  **Note**: You are welcome to contribute the settings on your end if you have made the code work properly on other GPUs.
+  **Note**: You are welcome to contribute the settings on your end if you have made the code work properly on other GPUs.(<font color=red>这里保持默认,不对setup.py做任何修改</font>)
 
 
-3. Build the Cython modules
+3. 编译创建 Cython modules
   ```Shell
   make clean
   make
   cd ..
   ```
 
-4. Install the [Python COCO API](https://github.com/pdollar/coco). The code requires the API to access COCO dataset.
-  ```Shell
+4. 安装 [Python COCO API](https://github.com/pdollar/coco). 这是操作COCO dataset所必须的
+  ```Shell
   cd data
   git clone https://github.com/pdollar/coco.git
   cd coco/PythonAPI
   make
   cd ../../..
-  ```
+  ```
+  
+<font color=red>安装环节到此结束!</font>
 
 ### Setup data
 Please follow the instructions of py-faster-rcnn [here](https://github.com/rbgirshick/py-faster-rcnn#beyond-the-demo-installation-for-training-and-testing-models) to setup VOC and COCO datasets (Part of COCO is done). The steps involve downloading data and optionally creating soft links in the ``data`` folder. Since faster RCNN does not rely on pre-computed proposals, it is safe to ignore the steps that setup proposals.
