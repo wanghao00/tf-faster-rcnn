@@ -99,9 +99,9 @@ Additional features not mentioned in the [report](https://arxiv.org/pdf/1702.021
   cd coco/PythonAPI
   make
   cd ../../..
-  ```
+  ```
   
-<font color=red>安装环节到此结束!</font>
+<font color='red'>安装环节到此结束!</font>
 
 ### Setup data
 Please follow the instructions of py-faster-rcnn [here](https://github.com/rbgirshick/py-faster-rcnn#beyond-the-demo-installation-for-training-and-testing-models) to setup VOC and COCO datasets (Part of COCO is done). The steps involve downloading data and optionally creating soft links in the ``data`` folder. Since faster RCNN does not rely on pre-computed proposals, it is safe to ignore the steps that setup proposals.
