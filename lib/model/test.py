@@ -140,6 +140,48 @@ def apply_nms(all_boxes, thresh):
   return nms_boxes
 
 def test_net(sess, net, imdb, weights_filename, max_per_image=100, thresh=0.05):
+  def _filter_boxes(all_boxes):
+    for im_ind in range(len(imdb.image_index)):
+      # get baseline
+      dets = []
+      for cls_ind in range(1, imdb.num_classes):
+        dets += list(all_boxes[cls_ind][im_ind])
+      if dets == []:
+        continue
+      im = cv2.imread(imdb.image_path_at(im_ind))
+      # print(imdb.image_path_at(im_ind), im.shape)
+      HEIGHT = im.shape[0]
+      center = HEIGHT / 2
+      ind, cur = 0, im.shape[0]
+      for k in range(len(dets)):
+        if abs((dets[k][1] + dets[k][3]) / 2 - center) < cur:
+          ind, cur = k, abs((dets[k][1] + dets[k][3]) / 2 - center)
+      print(dets[ind][3] - dets[ind][1])
+      baseline = dets[ind][3] - dets[ind][1]
+      left, right = 250, 550
+
+      # remove
+      for cls_ind in range(1, imdb.num_classes):
+        dets = list(all_boxes[cls_ind][im_ind])
+        if dets == []:
+          continue
+        rmlist = []
+        for index, det in enumerate(dets):
+          # # Y2 < Ymax or Y1> HEIGHT-baseline
+          if det[3] < baseline or det[1] > HEIGHT - baseline:
+          # if det[3] < baseline or det[1] > HEIGHT - baseline or det[0] <= left or det[0] >= right:
+            rmlist+=[index]
+        rmlist.sort(reverse=True)
+        for i in rmlist:
+          dets.pop(i)
+        all_boxes[cls_ind][im_ind] = np.array(dets)
+      #                  dets[k, 2] + 1, dets[k, 3] + 1)
+      # for k in range(dets.shape[0]):
+      #   f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
+      #           format(index, dets[k, -1],
+      #                  dets[k, 0] + 1, dets[k, 1] + 1,
+      #                  dets[k, 2] + 1, dets[k, 3] + 1))
+    pass
   np.random.seed(cfg.RNG_SEED)
   """Test a Fast R-CNN network on an image database."""
   num_images = len(imdb.image_index)
@@ -153,6 +195,7 @@ def test_net(sess, net, imdb, weights_filename, max_per_image=100, thresh=0.05):
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
+  time_start = time.time()
   for i in range(num_images):
     im = cv2.imread(imdb.image_path_at(i))
 
@@ -187,11 +230,14 @@ def test_net(sess, net, imdb, weights_filename, max_per_image=100, thresh=0.05):
     print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
         .format(i + 1, num_images, _t['im_detect'].average_time,
             _t['misc'].average_time))
+  time_end = time.time()
+  print('ALL time: %.3f s' % (time_end - time_start))
 
   det_file = os.path.join(output_dir, 'detections.pkl')
   with open(det_file, 'wb') as f:
     pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
 
   print('Evaluating detections')
+  # _filter_boxes(all_boxes)
   imdb.evaluate_detections(all_boxes, output_dir)
 

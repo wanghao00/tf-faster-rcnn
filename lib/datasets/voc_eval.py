@@ -8,7 +8,7 @@ from __future__ import division
 from __future__ import print_function
 
 import xml.etree.ElementTree as ET
-import os
+import os, time
 import pickle
 import numpy as np
 
@@ -140,6 +140,7 @@ def voc_eval(detpath,
                              'difficult': difficult,
                              'det': det}
 
+  fout = open('experiments/logs/fp_'+ time.strftime('%Y%m%d%H%M%S_', time.localtime())+classname+'.txt', 'w')
   # read dets
   detfile = detpath.format(classname)
   with open(detfile, 'r') as f:
@@ -194,10 +195,13 @@ def voc_eval(detpath,
             tp[d] = 1.
             R['det'][jmax] = 1
           else:
+            fout.writelines('{} {} {} {}\n'.format(classname, image_ids[d], bb, ovmax))
             fp[d] = 1.
       else:
+        fout.writelines('{} {} [ {} {} {} {} ]\n'.format(classname, image_ids[d], bb[0], bb[1], bb[2], bb[3]))
         fp[d] = 1.
 
+  fout.close()
   # compute precision recall
   fp = np.cumsum(fp)
   tp = np.cumsum(tp)
@@ -207,4 +211,6 @@ def voc_eval(detpath,
   prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
   ap = voc_ap(rec, prec, use_07_metric)
 
-  return rec, prec, ap
+  # return rec, prec, ap
+  # nd: all detect   npos: all labeled in *.xml
+  return tp[-1], fp[-1], nd, npos, rec[-1], prec[-1], ap

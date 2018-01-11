@@ -36,7 +36,7 @@ def parse_args():
             action='store_true')
   parser.add_argument('--num_dets', dest='max_per_image',
             help='max number of detections per image',
-            default=100, type=int)
+            default=10, type=int)
   parser.add_argument('--tag', dest='tag',
                         help='tag of the model',
                         default='', type=str)
@@ -114,6 +114,6 @@ if __name__ == '__main__':
     sess.run(tf.global_variables_initializer())
     print('Loaded.')
 
-  test_net(sess, net, imdb, filename, max_per_image=args.max_per_image)
+  test_net(sess, net, imdb, filename, max_per_image=args.max_per_image, thresh=0.5)
 
   sess.close()
