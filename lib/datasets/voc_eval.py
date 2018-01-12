@@ -205,12 +205,15 @@ def voc_eval(detpath,
   # compute precision recall
   fp = np.cumsum(fp)
   tp = np.cumsum(tp)
+
+  # return rec, prec, ap
+  # nd: all detect   npos: all labeled in *.xml
+  if nd == 0 or npos == 0:
+      return 0, 0, nd, npos, 0, 0, 0
+
   rec = tp / float(npos)
   # avoid divide by zero in case the first detection matches a difficult
   # ground truth
   prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
   ap = voc_ap(rec, prec, use_07_metric)
-
-  # return rec, prec, ap
-  # nd: all detect   npos: all labeled in *.xml
   return tp[-1], fp[-1], nd, npos, rec[-1], prec[-1], ap
